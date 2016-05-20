@@ -62,12 +62,7 @@ inline Int_t DrawAsPDF (TH1F *h, const char *outputName) {
 } // DrawAsPDF
 
 inline Int_t DrawAsPDF (TH1F *h) {
-  TCanvas *c { new TCanvas() };
-  TString  fout = h->GetName();
-
-  fout += ".pdf";
-  h->Draw();
-  c->SaveAs(fout);
+  DrawAsPDF(h, h->GetName());
 
   return 0;
 } // DrawAsPDF
@@ -86,14 +81,7 @@ inline Int_t DrawCOLZ (TH2F *h, const char *outputName) {
 } // DrawCOLZ
 
 inline Int_t DrawCOLZ (TH2F *h) {
-  TCanvas *c { new TCanvas() };
-  TString  fout = h->GetName();
-
-  fout += ".pdf";
-  h->Draw("COLZ");
-  h->SetStats(kFALSE);
-  c->SetRightMargin(0.13);
-  c->SaveAs(fout);
+  DrawCOLZ(h, h->GetName());
 
   return 0;
 } // DrawCOLZ
