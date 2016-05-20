@@ -117,7 +117,7 @@ void readTree (const char *inputFile = "MyAna.root",
 
   TH2F *h_Matrix { new TH2F("Matrix", "", nBins(-4, 4, 0.5), -4, 4,
                             nBins(-4, 4, 0.5), -4, 4) };
-  MyTree->Project(h_Matrix->GetName(), "Example1:Example2", "");
+  MyTree->Project(h_Matrix->GetName(), "Example2:Example1", "");
 
   // ###------------------------
   // Histogram plotting options
