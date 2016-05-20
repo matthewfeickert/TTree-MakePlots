@@ -16,7 +16,7 @@ root [1] _file0->ls()
 
 Executing ```readTree.cxx``` from the command line
 ```
-$ root -l -q readTree.cxx
+$ root -l -b -q readTree.cxx
 ```
 will then load the ROOT file, read the TTree, make plots from the branches of the TTree, and then write those plots to a ROOT file.
 
