@@ -50,25 +50,53 @@ Int_t NormalizeToUnity (TH2F &h) {
   return 0;
 } // NormalizeToUnity
 
+inline Int_t DrawAsPDF (TH1F *h, const char *outputName) {
+  TCanvas *c { new TCanvas() };
+  TString  fout = outputName;
+
+  fout += ".pdf";
+  h->Draw();
+  c->SaveAs(fout);
+
+  return 0;
+} // DrawAsPDF
+
+inline Int_t DrawAsPDF (TH1F *h) {
+  TCanvas *c { new TCanvas() };
+  TString  fout = h->GetName();
+
+  fout += ".pdf";
+  h->Draw();
+  c->SaveAs(fout);
+
+  return 0;
+} // DrawAsPDF
+
 inline Int_t DrawCOLZ (TH2F *h, const char *outputName) {
   TCanvas *c { new TCanvas() };
+  TString  fout = outputName;
 
+  fout += ".pdf";
   h->Draw("COLZ");
   h->SetStats(kFALSE);
   c->SetRightMargin(0.13);
-  c->SaveAs(outputName);
+  c->SaveAs(fout);
 
   return 0;
 } // DrawCOLZ
 
-inline Int_t DrawAsPDF (TH1F *h, const char *outputName) {
+inline Int_t DrawCOLZ (TH2F *h) {
   TCanvas *c { new TCanvas() };
+  TString  fout = h->GetName();
 
-  h->Draw();
-  c->SaveAs(outputName);
+  fout += ".pdf";
+  h->Draw("COLZ");
+  h->SetStats(kFALSE);
+  c->SetRightMargin(0.13);
+  c->SaveAs(fout);
 
   return 0;
-} // DrawAsPDF
+} // DrawCOLZ
 
 void readTree (const char *inputFile = "MyAna.root",
                const char *outputFile = "histograms.root",
@@ -152,8 +180,8 @@ void readTree (const char *inputFile = "MyAna.root",
   histFile->Close();
 
   if (DrawPlots) {
-    DrawAsPDF(h_Example1, "Example1.pdf");
-    DrawAsPDF(h_Example2, "Example2.pdf");
-    DrawCOLZ(h_Matrix, "Matrix.pdf");
+    DrawAsPDF(h_Example1);
+    DrawAsPDF(h_Example2);
+    DrawCOLZ(h_Matrix);
   }
 } // readTree
