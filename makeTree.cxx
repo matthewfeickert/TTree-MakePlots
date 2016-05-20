@@ -6,7 +6,7 @@ void makeTree (const char *outputFile = "MyAna.root") {
 
   TFile MyFile(outputFile, "recreate");
 
-  TTree *MyTree = new TTree("MyTree", "MyTree");
+  TTree *MyTree { new TTree("MyTree", "MyTree") };
 
   MyTree->Branch("Example1", &Example1);
   MyTree->Branch("Example2", &Example2);
