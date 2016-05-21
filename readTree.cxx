@@ -35,7 +35,7 @@ inline Int_t SetHistOptions (TH2F &h, const char *xAxisTitle, const char *yAxisT
 } // SetHistOptions
 
 Int_t NormalizeToUnity (TH1F &h) {
-  Double_t norm = 1 / h.Integral();
+  Double_t norm { 1. / h.Integral() };
 
   h.Scale(norm);
 
@@ -43,7 +43,7 @@ Int_t NormalizeToUnity (TH1F &h) {
 } // NormalizeToUnity
 
 Int_t NormalizeToUnity (TH2F &h) {
-  Double_t norm = 1 / h.Integral();
+  Double_t norm { 1. / h.Integral() };
 
   h.Scale(norm);
 
@@ -52,7 +52,7 @@ Int_t NormalizeToUnity (TH2F &h) {
 
 inline Int_t DrawAsPDF (TH1F *h, const char *outputName) {
   TCanvas *c { new TCanvas() };
-  TString  fout = outputName;
+  TString  fout { outputName };
 
   fout += ".pdf";
   h->Draw();
@@ -69,7 +69,7 @@ inline Int_t DrawAsPDF (TH1F *h) {
 
 inline Int_t DrawCOLZ (TH2F *h, const char *outputName) {
   TCanvas *c { new TCanvas() };
-  TString  fout = outputName;
+  TString  fout { outputName };
 
   fout += ".pdf";
   h->Draw("COLZ");
@@ -112,7 +112,7 @@ void readTree (const char *inputFile = "MyAna.root",
   // ###------------------------
   // Fill all histograms
   // ###------------------------
-  Int_t nEntries = (Int_t)MyTree->GetEntries();
+  Int_t nEntries { (Int_t)MyTree->GetEntries() };
 
   for (Int_t i = 0; i < nEntries; i++) {
     // branches
