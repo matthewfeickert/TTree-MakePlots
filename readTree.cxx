@@ -8,6 +8,14 @@ Int_t nBins (Int_t min, Int_t max, Double_t binning) {
   return TMath::CeilNint((max - min) / binning);
 }
 
+Int_t nBins (Int_t min, Double_t max, Double_t binning) {
+  return TMath::CeilNint((max - min) / binning);
+}
+
+Int_t nBins (Double_t min, Int_t max, Double_t binning) {
+  return TMath::CeilNint((max - min) / binning);
+}
+
 Int_t nBins (Double_t min, Double_t max, Double_t binning) {
   return TMath::CeilNint((max - min) / binning);
 }
