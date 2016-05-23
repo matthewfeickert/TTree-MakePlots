@@ -9,11 +9,11 @@ Int_t nBins (Int_t min, Int_t max, Double_t binning) {
 }
 
 Int_t nBins (Int_t min, Double_t max, Double_t binning) {
-  return TMath::CeilNint((max - min) / binning);
+  return TMath::CeilNint((max - static_cast<Double_t>(min)) / binning);
 }
 
 Int_t nBins (Double_t min, Int_t max, Double_t binning) {
-  return TMath::CeilNint((max - min) / binning);
+  return TMath::CeilNint((static_cast<Double_t>(max) - min) / binning);
 }
 
 Int_t nBins (Double_t min, Double_t max, Double_t binning) {
