@@ -127,6 +127,11 @@ Int_t DrawOverlay (const TH1F &hist1, const TH1F &hist2, const char *outputName,
   h2->Draw("SAME");
   gPad->Update();
 
+  TLegend *legend { new TLegend(0.72, 0.75, 0.9, 0.9) };
+  legend->AddEntry(h1, h1->GetName(), "L");
+  legend->AddEntry(h2, h2->GetName(), "L");
+  legend->Draw();
+
   c->SaveAs(fout);
 
   return 0;
