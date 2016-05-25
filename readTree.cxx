@@ -20,6 +20,14 @@ Int_t nBins (Double_t min, Double_t max, Double_t binning) {
   return TMath::CeilNint((max - min) / binning);
 }
 
+Double_t GetMaxValue (const TH1F &h) {
+  return h.GetBinContent(h.GetMaximumBin());
+}
+
+Double_t GetMinValue (const TH1F &h) {
+  return h.GetBinContent(h.GetMinimumBin());
+}
+
 inline Int_t SetHistOptions (TH1F &h, const char *xAxisTitle, const char *yAxisTitle,
                              Float_t TitleOffset, Float_t Minimum = 0.) {
   h.SetFillColor(kWhite);
@@ -93,6 +101,36 @@ inline Int_t DrawCOLZ (TH2F *h) {
 
   return 0;
 } // DrawCOLZ
+
+Int_t DrawOverlay (const TH1F &hist1, const TH1F &hist2, const char *outputName,
+                   const char *xAxisTitle, const char *yAxisTitle,
+                   Float_t TitleOffset) {
+  TCanvas *c { new TCanvas() };
+  TH1F    *h1 { (TH1F*)hist1.Clone(hist1.GetName()) };
+  TH1F    *h2 { (TH1F*)hist2.Clone(hist2.GetName()) };
+  TString  fout { outputName };
+
+  fout += ".pdf";
+
+  SetHistOptions(*h1, xAxisTitle, yAxisTitle, TitleOffset);
+  Double_t Maximum { GetMaxValue(*h1) > GetMaxValue(*h2)
+                     ? GetMaxValue(*h1) : GetMaxValue(*h2) };
+  Double_t Minimum { GetMaxValue(*h1) > GetMaxValue(*h2)
+                     ? GetMaxValue(*h2) : GetMaxValue(*h1) };
+  h1->SetMaximum((3. * Maximum - Minimum) / 2.);
+  h1->SetLineColor(kBlack);
+  h2->SetLineColor(kBlue);
+  h1->SetStats(kFALSE);
+  h2->SetStats(kFALSE);
+  h1->Draw();
+  gPad->Update();
+  h2->Draw("SAME");
+  gPad->Update();
+
+  c->SaveAs(fout);
+
+  return 0;
+} // DrawOverlay
 
 void readTree (const char *inputFile = "MyAna.root",
                const char *outputFile = "histograms.root",
@@ -179,5 +217,7 @@ void readTree (const char *inputFile = "MyAna.root",
     DrawAsPDF(h_Example1);
     DrawAsPDF(h_Example2);
     DrawCOLZ(h_Matrix);
+    DrawOverlay(*h_Example1, *h_Example2, "overlayPlot", "value [units]",
+                "Fraction of Total Events/Bin", 1.5);
   }
 } // readTree
