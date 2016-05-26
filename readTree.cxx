@@ -3,7 +3,7 @@
 
 void readTree (const char *inputFile = "MyAna.root",
                const char *outputFile = "histograms.root",
-               Bool_t      DrawPlots = kFALSE) {
+               Bool_t      DrawPlots = kTRUE) {
   // Load the TTree creaed from the xAOD
   gROOT->Reset();
 
@@ -45,6 +45,8 @@ void readTree (const char *inputFile = "MyAna.root",
   MyTree->Project(h_Example2->GetName(), "Example2", "Example2 >= 0.");
 
   // ### Short method
+  TH1F *h_Example3 { new TH1F("Example3", "", nBins(-4, 4, 0.1), -4, 4) };
+  MyTree->Project(h_Example3->GetName(), "Example2", "");
 
   TH2F *h_Matrix { new TH2F("Matrix", "", nBins(-4, 4, 0.5), -4, 4,
                             nBins(-4, 4, 0.5), -4, 4) };
@@ -56,6 +58,7 @@ void readTree (const char *inputFile = "MyAna.root",
   // Set the axis and plot titles
   SetHistOptions(*h_Example1, "value [units]", "Fraction of Total Events/1 units",   1.5);
   SetHistOptions(*h_Example2, "value [units]", "Fraction of Total Events/0.5 units", 1.5);
+  SetHistOptions(*h_Example3, "value [units]", "Fraction of Total Events/0.1 units", 1.5);
 
   SetHistOptions(*h_Matrix,
                  "value [units]",
@@ -69,6 +72,7 @@ void readTree (const char *inputFile = "MyAna.root",
   // ###------------------------
   NormalizeToUnity(*h_Example1);
   NormalizeToUnity(*h_Example2);
+  NormalizeToUnity(*h_Example3);
 
   // save the histograms to a root file for later access
   // ###------------------------
@@ -78,6 +82,7 @@ void readTree (const char *inputFile = "MyAna.root",
 
   h_Example1->Write();
   h_Example2->Write();
+  h_Example3->Write();
   h_Matrix->Write();
 
   histFile->Close();
@@ -85,8 +90,19 @@ void readTree (const char *inputFile = "MyAna.root",
   if (DrawPlots) {
     DrawAsPDF(h_Example1);
     DrawAsPDF(h_Example2);
+    DrawAsPDF(h_Example3);
     DrawCOLZ(h_Matrix);
-    DrawOverlay(*h_Example1, *h_Example2, "overlayPlot", "value [units]",
+    DrawOverlay(*h_Example1, *h_Example2, "overlay2Plots", "value [units]",
                 "Fraction of Total Events/Bin", 1.5);
+
+    std::vector<TH1F*>   hist        = { h_Example1, h_Example2, h_Example3 };
+    std::vector<Color_t> color       = { kBlack, kBlue, kGreen };
+    std::vector<const char*> legName = { hist[0]->GetName(), hist[1]->GetName(),
+                                         hist[2]->GetName() };
+    std::vector<const char*> legOption = { "L", "L", "L" };
+    DrawOverlay(hist, color, "overlay3aPlots", "value [units]",
+                "Fraction of Total Events/Bin", 1.5);
+    DrawOverlay(hist, color, legName,          legOption,
+                "overlay3bPlots", "value [units]", "Fraction of Total Events/Bin", 1.5);
   }
 } // readTree
