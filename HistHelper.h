@@ -51,6 +51,17 @@ inline Int_t SetHistOptions (TH2F &h, const char *xAxisTitle, const char *yAxisT
   return 0;
 } // SetHistOptions
 
+inline Int_t SetHistOptions (THStack &h, const char *xAxisTitle, const char *yAxisTitle,
+                             Float_t TitleOffset, Float_t Minimum = 0.) {
+  /*Can be called only AFTER Draw() has been called.*/
+  h.GetXaxis()->SetTitle(xAxisTitle);
+  h.GetYaxis()->SetTitle(yAxisTitle);
+  h.GetYaxis()->SetTitleOffset(TitleOffset);
+  h.SetMinimum(Minimum);
+
+  return 0;
+} // SetHistOptions
+
 Int_t NormalizeToUnity (TH1F &h) {
   Double_t norm { 1. / h.Integral() };
 
@@ -67,6 +78,16 @@ Int_t NormalizeToUnity (TH2F &h) {
   return 0;
 } // NormalizeToUnity
 
+Int_t NormalizeToUnity (std::vector<TH1F*> &h) {
+  Double_t Total { 0. };
+
+  for (Int_t i = 0; i < h.size(); ++i) Total += h[i]->Integral();
+
+  for (Int_t i = 0; i < h.size(); ++i) h[i]->Scale(1. / Total);
+
+  return 0;
+} // NormalizeToUnity
+
 Int_t SaveWithExtension (const TCanvas &c, const char *name, const char *extension) {
   TString fout { name };
 
@@ -77,10 +98,13 @@ Int_t SaveWithExtension (const TCanvas &c, const char *name, const char *extensi
 } // SaveWithExtensions
 
 inline Int_t DrawAsPDF (TH1F *h, const char *outputName) {
-  TCanvas *c { new TCanvas() };
+  TCanvas *c { new TCanvas("c", "", 800, 600) };
 
   h->Draw();
   SaveWithExtension(*c, outputName, "pdf");
+
+  delete c;
+  c = nullptr;
 
   return 0;
 } // DrawAsPDF
@@ -92,12 +116,15 @@ inline Int_t DrawAsPDF (TH1F *h) {
 } // DrawAsPDF
 
 inline Int_t DrawCOLZ (TH2F *h, const char *outputName) {
-  TCanvas *c { new TCanvas() };
+  TCanvas *c { new TCanvas("c", "", 600, 600) };
 
   h->Draw("COLZ");
   h->SetStats(kFALSE);
   c->SetRightMargin(0.13);
   SaveWithExtension(*c, outputName, "pdf");
+
+  delete c;
+  c = nullptr;
 
   return 0;
 } // DrawCOLZ
@@ -170,7 +197,7 @@ Int_t HistOverlay (std::vector<TH1F*> h, std::vector<Color_t> color) {
 Int_t DrawOverlay (const TH1F &hist1, const TH1F &hist2, const char *outputName,
                    const char *xAxisTitle, const char *yAxisTitle,
                    Float_t TitleOffset) {
-  TCanvas *c { new TCanvas() };
+  TCanvas *c { new TCanvas("c", "", 800, 600) };
   TH1F    *h1 { (TH1F*)hist1.Clone(hist1.GetName()) };
   TH1F    *h2 { (TH1F*)hist2.Clone(hist2.GetName()) };
 
@@ -184,19 +211,27 @@ Int_t DrawOverlay (const TH1F &hist1, const TH1F &hist2, const char *outputName,
 
   SaveWithExtension(*c, outputName, "pdf");
 
+  delete c;
+  c = nullptr;
+  delete legend;
+  legend = nullptr;
+
   return 0;
 } // DrawOverlay
 
 Int_t DrawOverlay (const std::vector<TH1F*> hist, const std::vector<Color_t> color,
                    const char *outputName, const char *xAxisTitle, const char *yAxisTitle,
                    Float_t TitleOffset) {
-  TCanvas *c { new TCanvas() };
+  TCanvas *c { new TCanvas("c", "", 800, 600) };
 
   std::vector<TH1F*> h { CloneHists(hist) };
   SetHistOptions(*h[0], xAxisTitle, yAxisTitle, TitleOffset);
   HistOverlay(h, color);
 
   SaveWithExtension(*c, outputName, "pdf");
+
+  delete c;
+  c = nullptr;
 
   return 0;
 } // DrawOverlay
@@ -205,12 +240,14 @@ Int_t DrawOverlay (const std::vector<TH1F*> hist, const std::vector<Color_t> col
                    const std::vector<const char*> lName,
                    const std::vector<const char*> lOption, const char *outputName,
                    const char *xAxisTitle, const char *yAxisTitle, Float_t TitleOffset) {
-  TCanvas *c { new TCanvas() };
+  TCanvas *c { new TCanvas("c", "", 800, 600) };
 
   std::vector<TH1F*> h { CloneHists(hist) };
   SetHistOptions(*h[0], xAxisTitle, yAxisTitle, TitleOffset);
   HistOverlay(h, color);
 
+  /*Could just use c->BuildLegend(0.72, 0.75, 0.9, 0.9) but I think the legend looks
+     nicer and is worth two extra arguments.*/
   TLegend *legend { new TLegend(0.72, 0.75, 0.9, 0.9) };
 
   for (Int_t i = 0; i < h.size(); ++i) legend->AddEntry(h[i], lName[i], lOption[i]);
@@ -218,7 +255,77 @@ Int_t DrawOverlay (const std::vector<TH1F*> hist, const std::vector<Color_t> col
 
   SaveWithExtension(*c, outputName, "pdf");
 
+  delete c;
+  c = nullptr;
+  delete legend;
+  legend = nullptr;
+
   return 0;
 } // DrawOverlay
+
+Bool_t AreaCompare (const TH1F *a, const TH1F *b) {
+  return a->Integral() > b->Integral();
+}
+
+Bool_t SameNumberBins (const std::vector<TH1F*> &v) {
+  Int_t nbins { v[0]->GetSize() };
+
+  for (Int_t i = 0; i < v.size(); ++i) {
+    if (nbins != v[i]->GetSize()) return kFALSE;
+  }
+
+  return kTRUE;
+} // SameNumberBins
+
+Int_t RebinHists (std::vector<TH1F*> &h) {
+  std::vector<Int_t> numberBins;
+  numberBins.clear();
+
+  for (Int_t i = 0; i < h.size(); ++i) numberBins.push_back(h[i]->GetSize() - 2);
+  std::sort(numberBins.begin(), numberBins.end());
+
+  for (Int_t i = 0; i < h.size(); ++i) h[i]->Rebin(numberBins[0]);
+
+  return 0;
+} // RebinHists
+
+THStack* HistStack (std::vector<TH1F*> &h, std::vector<Color_t> color) {
+  THStack *hs { new THStack() };
+
+  // if (!SameNumberBins(h)) RebinHists(h); //BROKEN
+  std::stable_sort(h.begin(), h.end(), AreaCompare);
+
+  for (Int_t i = 0; i < h.size(); ++i) {
+    h[i]->SetLineColor(kBlack);
+    h[i]->SetFillColor(color[i]);
+    h[i]->SetMarkerColor(color[i]);
+    h[i]->SetStats(kFALSE);
+    hs->Add(h[i]);
+  }
+  return hs;
+} // HistStack
+
+Int_t DrawStacked (const std::vector<TH1F*> hist, const std::vector<Color_t> color,
+                   const char *outputName, const char *xAxisTitle, const char *yAxisTitle,
+                   Float_t TitleOffset, Bool_t Normalize = kFALSE) {
+  TCanvas *c { new TCanvas("c", "", 800, 600) };
+
+  std::vector<TH1F*> h { CloneHists(hist) };
+
+  if (Normalize) NormalizeToUnity(h);
+  THStack *hs { HistStack(h, color) };
+  hs->Draw();
+  SetHistOptions(*hs, xAxisTitle, yAxisTitle, TitleOffset);
+  c->BuildLegend(0.72, 0.75, 0.9, 0.9);
+
+  SaveWithExtension(*c, outputName, "pdf");
+
+  delete c;
+  c = nullptr;
+  delete hs;
+  hs = nullptr;
+
+  return 0;
+} // DrawStacked
 
 #endif // ifndef HISTHELPER_H
