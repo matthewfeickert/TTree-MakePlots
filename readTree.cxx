@@ -45,7 +45,7 @@ void readTree (const char *inputFile = "MyAna.root",
   MyTree->Project(h_Example2->GetName(), "Example2", "Example2 >= 0.");
 
   // ### Short method
-  TH1F *h_Example3 { new TH1F("Example3", "", nBins(-4, 4, 0.1), -4, 4) };
+  TH1F *h_Example3 { new TH1F("Example3", "", nBins(-4, 4, 0.2), -4, 4) };
   MyTree->Project(h_Example3->GetName(), "Example2", "");
 
   TH2F *h_Matrix { new TH2F("Matrix", "", nBins(-4, 4, 0.5), -4, 4,
@@ -70,9 +70,11 @@ void readTree (const char *inputFile = "MyAna.root",
   // ###------------------------
   //  Normalize histograms to unit area
   // ###------------------------
-  NormalizeToUnity(*h_Example1);
-  NormalizeToUnity(*h_Example2);
-  NormalizeToUnity(*h_Example3);
+  std::vector<TH1F*> histlist = { h_Example1, h_Example2, h_Example3 };
+  std::vector<TH1F*> unnorm { CloneHists(histlist) };
+  Normalize(*h_Example1);
+  Normalize(*h_Example2);
+  Normalize(*h_Example3);
 
   // save the histograms to a root file for later access
   // ###------------------------
@@ -102,7 +104,23 @@ void readTree (const char *inputFile = "MyAna.root",
     std::vector<const char*> legOption = { "L", "L", "L" };
     DrawOverlay(hist, color, "overlay3aPlots", "value [units]",
                 "Fraction of Total Events/Bin", 1.5);
-    DrawOverlay(hist, color, legName,          legOption,
-                "overlay3bPlots", "value [units]", "Fraction of Total Events/Bin", 1.5);
+    DrawOverlay(hist, color, legName,          legOption, "overlay3bPlots",
+                "value [units]", "Fraction of Total Events/Bin", 1.5);
+    color.clear();
+    color = { kBlue, kRed, kGreen };
+    DrawStacked(unnorm, color, "stackedPlots", "value [units]", "Events/Bin", 1.5);
+    DrawStacked(unnorm, color, "stackedNorm",  "value [units]",
+                "Fraction of Total Events/Bin", 1.5, kTRUE);
   }
+
+  // ###------------------------
+  // Free memory
+  // ###------------------------
+  delete h_Example1;
+  delete h_Example2;
+  delete h_Example3;
+
+  h_Example1 = nullptr;
+  h_Example2 = nullptr;
+  h_Example3 = nullptr;
 } // readTree

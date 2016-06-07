@@ -21,6 +21,10 @@ Int_t nBins (Double_t min, Double_t max, Double_t binning) {
   return TMath::CeilNint((max - min) / binning);
 }
 
+Int_t nBins (Double_t min, Double_t max, Int_t binning) {
+  return TMath::CeilNint((max - min) / static_cast<Double_t>(binning));
+}
+
 Double_t GetMaxValue (const TH1F &h) {
   return h.GetBinContent(h.GetMaximumBin());
 }
@@ -62,31 +66,31 @@ inline Int_t SetHistOptions (THStack &h, const char *xAxisTitle, const char *yAx
   return 0;
 } // SetHistOptions
 
-Int_t NormalizeToUnity (TH1F &h) {
-  Double_t norm { 1. / h.Integral() };
+Int_t Normalize (TH1F &h, Double_t area = 1.) {
+  Double_t norm { area / h.Integral() };
 
   h.Scale(norm);
 
   return 0;
-} // NormalizeToUnity
+} // Normalize
 
-Int_t NormalizeToUnity (TH2F &h) {
-  Double_t norm { 1. / h.Integral() };
+Int_t Normalize (TH2F &h, Double_t volume = 1.) {
+  Double_t norm { volume / h.Integral() };
 
   h.Scale(norm);
 
   return 0;
-} // NormalizeToUnity
+} // Normalize
 
-Int_t NormalizeToUnity (std::vector<TH1F*> &h) {
+Int_t Normalize (std::vector<TH1F*> &h, Double_t area = 1.) {
   Double_t Total { 0. };
 
   for (Int_t i = 0; i < h.size(); ++i) Total += h[i]->Integral();
 
-  for (Int_t i = 0; i < h.size(); ++i) h[i]->Scale(1. / Total);
+  for (Int_t i = 0; i < h.size(); ++i) h[i]->Scale(area / Total);
 
   return 0;
-} // NormalizeToUnity
+} // Normalize
 
 Int_t SaveWithExtension (const TCanvas &c, const char *name, const char *extension) {
   TString fout { name };
@@ -307,12 +311,12 @@ THStack* HistStack (std::vector<TH1F*> &h, std::vector<Color_t> color) {
 
 Int_t DrawStacked (const std::vector<TH1F*> hist, const std::vector<Color_t> color,
                    const char *outputName, const char *xAxisTitle, const char *yAxisTitle,
-                   Float_t TitleOffset, Bool_t Normalize = kFALSE) {
+                   Float_t TitleOffset, Bool_t MakeNormalized = kFALSE) {
   TCanvas *c { new TCanvas("c", "", 800, 600) };
 
   std::vector<TH1F*> h { CloneHists(hist) };
 
-  if (Normalize) NormalizeToUnity(h);
+  if (MakeNormalized) Normalize(h);
   THStack *hs { HistStack(h, color) };
   hs->Draw();
   SetHistOptions(*hs, xAxisTitle, yAxisTitle, TitleOffset);
