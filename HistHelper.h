@@ -1,6 +1,18 @@
 #ifndef HISTHELPER_H
 #define HISTHELPER_H
 
+#include <iostream>
+#include <TROOT.h>
+#include <TMath.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TBranch.h>
+#include <TH1F.h>
+#include <TH2F.h>
+#include <THStack.h>
+#include <TCanvas.h>
+#include <TLegend.h>
+
 Int_t nBins (Int_t min, Int_t max, Int_t binning) {
   return TMath::CeilNint((max - min) / binning);
 }
@@ -85,9 +97,9 @@ Int_t Normalize (TH2F &h, Double_t volume = 1.) {
 Int_t Normalize (std::vector<TH1F*> &h, Double_t area = 1.) {
   Double_t Total { 0. };
 
-  for (Int_t i = 0; i < h.size(); ++i) Total += h[i]->Integral();
+  for (UInt_t i = 0; i < h.size(); ++i) Total += h[i]->Integral();
 
-  for (Int_t i = 0; i < h.size(); ++i) h[i]->Scale(area / Total);
+  for (UInt_t i = 0; i < h.size(); ++i) h[i]->Scale(area / Total);
 
   return 0;
 } // Normalize
@@ -143,7 +155,7 @@ std::vector<TH1F*> CloneHists (const std::vector<TH1F*> v) {
   std::vector<TH1F*> h;
   h.reserve(v.size());
 
-  for (Int_t i = 0; i < v.size(); ++i) {
+  for (UInt_t i = 0; i < v.size(); ++i) {
     h.push_back((TH1F*)v[i]->Clone(v[i]->GetName()));
   }
   return h;
@@ -163,7 +175,7 @@ Double_t GetHistHeight (const std::vector<TH1F*> &v) {
   std::vector<Double_t> height;
   height.reserve(v.size());
 
-  for (Int_t i = 0; i < v.size(); ++i) height.push_back(GetMaxValue(*v[i]));
+  for (UInt_t i = 0; i < v.size(); ++i) height.push_back(GetMaxValue(*v[i]));
   std::sort(height.begin(), height.end(), std::greater<Double_t>());
   Double_t MaxValue { height[0] };
   Double_t NextValue { height[1] };
@@ -189,7 +201,7 @@ Int_t HistOverlay (TH1F &h1, TH1F &h2) {
 Int_t HistOverlay (std::vector<TH1F*> h, std::vector<Color_t> color) {
   h[0]->SetMaximum(GetHistHeight(h));
 
-  for (Int_t i = 0; i < h.size(); ++i) {
+  for (UInt_t i = 0; i < h.size(); ++i) {
     h[i]->SetLineColor(color[i]);
     h[i]->SetStats(kFALSE);
     h[i]->Draw("SAME");
@@ -254,7 +266,7 @@ Int_t DrawOverlay (const std::vector<TH1F*> hist, const std::vector<Color_t> col
      nicer and is worth two extra arguments.*/
   TLegend *legend { new TLegend(0.72, 0.75, 0.9, 0.9) };
 
-  for (Int_t i = 0; i < h.size(); ++i) legend->AddEntry(h[i], lName[i], lOption[i]);
+  for (UInt_t i = 0; i < h.size(); ++i) legend->AddEntry(h[i], lName[i], lOption[i]);
   legend->Draw();
 
   SaveWithExtension(*c, outputName, "pdf");
@@ -274,7 +286,7 @@ Bool_t AreaCompare (const TH1F *a, const TH1F *b) {
 Bool_t SameNumberBins (const std::vector<TH1F*> &v) {
   Int_t nbins { v[0]->GetSize() };
 
-  for (Int_t i = 0; i < v.size(); ++i) {
+  for (UInt_t i = 0; i < v.size(); ++i) {
     if (nbins != v[i]->GetSize()) return kFALSE;
   }
 
@@ -285,10 +297,10 @@ Int_t RebinHists (std::vector<TH1F*> &h) {
   std::vector<Int_t> numberBins;
   numberBins.clear();
 
-  for (Int_t i = 0; i < h.size(); ++i) numberBins.push_back(h[i]->GetSize() - 2);
+  for (UInt_t i = 0; i < h.size(); ++i) numberBins.push_back(h[i]->GetSize() - 2);
   std::sort(numberBins.begin(), numberBins.end());
 
-  for (Int_t i = 0; i < h.size(); ++i) h[i]->Rebin(numberBins[0]);
+  for (UInt_t i = 0; i < h.size(); ++i) h[i]->Rebin(numberBins[0]);
 
   return 0;
 } // RebinHists
@@ -299,7 +311,7 @@ THStack* HistStack (std::vector<TH1F*> &h, std::vector<Color_t> color) {
   // if (!SameNumberBins(h)) RebinHists(h); //BROKEN
   std::stable_sort(h.begin(), h.end(), AreaCompare);
 
-  for (Int_t i = 0; i < h.size(); ++i) {
+  for (UInt_t i = 0; i < h.size(); ++i) {
     h[i]->SetLineColor(kBlack);
     h[i]->SetFillColor(color[i]);
     h[i]->SetMarkerColor(color[i]);

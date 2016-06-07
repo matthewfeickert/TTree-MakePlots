@@ -7,4 +7,7 @@ clean :
 
 realclean : clean
 	rm -f *.root
+	rm -f *.d
+	rm -f *.so
+	rm -f *.pcm
 	\rm -f *~

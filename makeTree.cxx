@@ -1,5 +1,11 @@
 // Author: Matthew Feickert <matthew.feickert@cern.ch>
 
+#include <TROOT.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TBranch.h>
+#include <TRandom.h>
+
 void makeTree (const char *outputFile = "MyAna.root") {
   Double_t Example1 { -99999. };
   Double_t Example2 { -99999. };
