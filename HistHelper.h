@@ -136,7 +136,8 @@ inline Int_t DrawCOLZ (TH2F *h, const char *outputName) {
 
   h->Draw("COLZ");
   h->SetStats(kFALSE);
-  c->SetRightMargin(0.13);
+  c->SetLeftMargin(0.11);
+  c->SetRightMargin(0.15);
   SaveWithExtension(*c, outputName, "pdf");
 
   delete c;
