@@ -24,7 +24,7 @@ Arguments can be passed to the macros from the command line by running in batch 
 ###### Fixed Arguments
 To pass constant arguments of any type from the command line enclose the macro name and arguments in single quotes.
 ```
-root -l -b -q 'readTree.cxx("MyAna.root", "histograms.root", kFALSE)'
+root -l -b -q 'readTree.cxx("MyAna.root", "histograms.root", kTRUE)'
 ```
 ###### Shell Variable Arguments
 To pass shell variable arguments enclose the macro name and arguments in double quotes. If arguments are strings backslashes must proceed their quotation mark. The following would be the contents of the simpilest shell script where all three arguments are shell variables.<sup id="ref1">[1](#footnote1)</sup>
@@ -32,7 +32,7 @@ To pass shell variable arguments enclose the macro name and arguments in double 
 #!/bin/bash
 myInput=\"MyAna.root\"
 myOutput=\"histograms.root\"
-myBool=kFALSE
+myBool=kTRUE
 root -l -b -q "readTree.cxx(${myInput}, ${myOutput}, ${myBool})"
 ```
 ## References
