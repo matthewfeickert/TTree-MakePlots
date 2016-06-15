@@ -1,4 +1,7 @@
-// Author: Matthew Feickert <matthew.feickert@cern.ch>
+/*
+   Author: Matthew Feickert <matthew.feickert@cern.ch>
+   Tested on ROOT version: 6.07
+ */
 #include "HistHelper.h"
 
 void readTree (const char *inputFile = "MyAna.root",
@@ -87,8 +90,6 @@ void readTree (const char *inputFile = "MyAna.root",
   h_Example3->Write();
   h_Matrix->Write();
 
-  histFile->Close();
-
   if (DrawPlots) {
     DrawAsPDF(h_Example1);
     DrawAsPDF(h_Example2);
@@ -109,18 +110,20 @@ void readTree (const char *inputFile = "MyAna.root",
     color.clear();
     color = { kBlue, kRed, kGreen };
     DrawStacked(unnorm, color, "stackedPlots", "value [units]", "Events/Bin", 1.5);
-    DrawStacked(unnorm, color, "stackedNorm",  "value [units]",
+    DrawStacked(unnorm, color, "stackedNorm", "value [units]",
                 "Fraction of Total Events/Bin", 1.5, kTRUE);
   }
 
   // ###------------------------
-  // Free memory
+  // Close files and free memory
   // ###------------------------
-  delete h_Example1;
-  delete h_Example2;
-  delete h_Example3;
+  if (histFile->IsOpen()) {
+    histFile->cd();
+    histFile->Close();
+  }
 
-  h_Example1 = nullptr;
-  h_Example2 = nullptr;
-  h_Example3 = nullptr;
+  if (file->IsOpen()) {
+    file->cd();
+    file->Close();
+  }
 } // readTree
